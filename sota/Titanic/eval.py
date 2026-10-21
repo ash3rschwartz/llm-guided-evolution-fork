@@ -10,6 +10,7 @@ import sys
 import pandas as pd
 import sklearn.metrics
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 import random
 
@@ -77,8 +78,16 @@ if __name__ == '__main__':
     X = train_df.drop("Survived", axis=1)
     y = train_df["Survived"]
 
+    # Same partition as our earlier ML / MOGP assignments: 33% held out, seed 100
     X_train, X_val, y_train, y_val = train_test_split(
-    X, y, test_size=0.2, random_state=0)
+        X, y, test_size=0.33, random_state=100)
+
+    # Milestone 2 pipeline: StandardScaler fit on the training rows only,
+    # then applied to the validation rows. Kept as DataFrames so that
+    # evolved models can still refer to columns by name.
+    scaler = StandardScaler()
+    X_train = pd.DataFrame(scaler.fit_transform(X_train), columns=X.columns, index=X_train.index)
+    X_val = pd.DataFrame(scaler.transform(X_val), columns=X.columns, index=X_val.index)
 
     model = model_module.Model()
     model.fit(X_train, y_train)
@@ -132,4 +141,3 @@ if __name__ == '__main__':
     print(f"results have been written to {filename}")
 
     print('='*120);print('job done');print('='*120)
-
